@@ -1,6 +1,7 @@
 #include "util.h"
 
 RE::TESFaction* g_SexLabGenderFaction = nullptr;
+RE::TESFaction* g_schlongifiedFaction = nullptr;
 
 //Trim the modname
 static std::string Trim(const std::string& str) {
@@ -44,15 +45,30 @@ static constexpr std::array<std::string_view, 11> kDefaultConcealingPlugins = {
 namespace Util {
 
 	void CheckDependencies() {
-
 		auto* dataHandler = RE::TESDataHandler::GetSingleton();
-		if (dataHandler) {
-			//Sexlab
-			g_SexLabGenderFaction = dataHandler->LookupForm<RE::TESFaction>(0x043A43, "SexLab.esm");
-			if (g_SexLabGenderFaction)
-				SKSE::log::info("SOS AE - SexLab Compatibility Enabled (Faction cached)");
+		if (!dataHandler) {
+			SKSE::log::error("SOS AE - Critical Error: DataHandler singleton is null.");
+			return;
+		}
+
+		//SexLab Check
+		g_SexLabGenderFaction = dataHandler->LookupForm<RE::TESFaction>(0x043A43, "SexLab.esm");
+		if (g_SexLabGenderFaction)
+			SKSE::log::info("SOS AE - SexLab Compatibility Enabled (Faction cached)");
+
+		//Schlongs of Skyrim Check
+		g_schlongifiedFaction = dataHandler->LookupForm<RE::TESFaction>(0x0063B7, "Schlongs of Skyrim - Core.esm");
+		if (g_schlongifiedFaction)
+			SKSE::log::info("SOS AE - SchlongifiedFaction cached successfully.");
+		else {
+			//Check if the ESM is active to narrow down the problem
+			if (dataHandler->LookupModByName("Schlongs of Skyrim - Core.esm"))
+				SKSE::log::error("SOS AE - Error: 'Schlongs of Skyrim - Core.esm' is loaded, but FormID 0x0063B7 could not be found inside it. The ESM structure may be altered or corrupted.");
+			else
+				SKSE::log::warn("SOS AE - Warning: 'Schlongs of Skyrim - Core.esm' is missing from the current load order.");
 		}
 	}
+
 
 	std::unordered_set<RE::BSFixedString> LoadValidatedModList(const RE::BSFixedString& a_filePath, const RE::BSFixedString& a_listName) {
 
@@ -220,6 +236,7 @@ namespace Util {
 		int defaultChance = g_JSONDefaults.value("Chance", 15);
 		float defaultDeviation = g_JSONDefaults.value("GaussianDeviation", 1.0f);
 		bool defaultWhiteList = g_JSONDefaults.value("SOS_SchlongEligibleActorMods is a Whitelist", true);
+		bool defaultSexLabForceMale = g_JSONDefaults.value("SexLabForceMaleOnSchlong", true);
 
 		if (ini.LoadFile(INIPath) < 0) {
 
@@ -228,11 +245,13 @@ namespace Util {
 			ini.SetLongValue("JSON", "Chance", defaultChance);
 			ini.SetDoubleValue("JSON", "GaussianDeviation", static_cast<double>(defaultDeviation));
 			ini.SetBoolValue("JSON", "SOS_SchlongEligibleActorMods is a Whitelist", defaultWhiteList);
+			ini.SetBoolValue("JSON", "SexLabForceMaleOnSchlong", defaultSexLabForceMale);
 
 			ini.SaveFile(INIPath);
 
 			g_isWhitelistMode = defaultWhiteList;
 			g_SOSGaussianDeviation = defaultDeviation;
+			g_SexLabForceMaleOnSchlong = defaultSexLabForceMale;
 			return;
 		}
 
@@ -246,6 +265,9 @@ namespace Util {
 
 		g_isWhitelistMode = ini.GetBoolValue("JSON", "SOS_SchlongEligibleActorMods is a Whitelist", defaultWhiteList);
 		g_JSONDefaults["SOS_SchlongEligibleActorMods is a Whitelist"] = g_isWhitelistMode;
+
+		g_SexLabForceMaleOnSchlong = ini.GetBoolValue("JSON", "SexLabForceMaleOnSchlong", defaultSexLabForceMale);
+		g_JSONDefaults["SexLabForceMaleOnSchlong"] = g_SexLabForceMaleOnSchlong;
 	}
 
 	//Papyrus functions
@@ -283,6 +305,27 @@ namespace Util {
 			SKSE::log::info("SOS: Global defaults updated via MCM (Enabled: {}, Rank: {}, Chance: {}).", a_enabled, a_rank, a_chance);
 		}
 	}
+
+	static bool GetSexLabForceMaleOnSchlong(RE::StaticFunctionTag*) {
+
+		return g_SexLabForceMaleOnSchlong;
+	}
+
+	static void SetSexLabForceMaleOnSchlong(RE::StaticFunctionTag*, bool a_value) {
+
+		g_SexLabForceMaleOnSchlong = a_value;
+		g_JSONDefaults["SexLabForceMaleOnSchlong"] = a_value;
+
+		CSimpleIniA ini;
+		ini.SetUnicode();
+		if (ini.LoadFile(INIPath) >= 0) {
+
+			ini.SetBoolValue("JSON", "SexLabForceMaleOnSchlong", a_value);
+			ini.SaveFile(INIPath);
+			SKSE::log::info("SOS: SexLab Force Male On Schlong set to {} via MCM.", a_value);
+		}
+	}
+
 	bool RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) {
 
 		if (!a_vm)
@@ -295,6 +338,9 @@ namespace Util {
 		a_vm->RegisterFunction("GetDefaultChance", SosPapyrusScript, GetDefaultChance);
 
 		a_vm->RegisterFunction("SetDefaultConfig", SosPapyrusScript, SetDefaultConfig);
+
+		a_vm->RegisterFunction("GetSexLabForceMaleOnSchlong", SosPapyrusScript, GetSexLabForceMaleOnSchlong);
+		a_vm->RegisterFunction("SetSexLabForceMaleOnSchlong", SosPapyrusScript, SetSexLabForceMaleOnSchlong);
 		return true;
 	}
 }

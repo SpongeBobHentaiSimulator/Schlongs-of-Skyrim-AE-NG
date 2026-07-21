@@ -262,7 +262,7 @@ namespace Actors {
 		else
 			Storage::SetNPCAddonData(baseID, a_addonName, currentRank);
 
-		//JSON Part
+		// JSON Part
 		RE::BSFixedString key = MakeNPCKey(base);
 		if (!key.empty()) {
 			auto* data = Storage::GetNPCData(baseID);
@@ -273,18 +273,29 @@ namespace Actors {
 		}
 
 		RE::TESObjectARMO* schlong = SchlongLogic::ResolveCachedAddon(baseID);
+		bool isValidSchlong = schlong && !Util::ArmorHasKeyword(schlong, PubKW);
 
-		//Sexlab Part
-		if (g_SexLabGenderFaction && Util::IsFemale(base)) {
+		if (isValidSchlong) {
+			a_actor->AddToFaction(g_schlongifiedFaction, 0);
 
-			if (!schlong || Util::ArmorHasKeyword(schlong, PubKW))
+			if (g_SexLabGenderFaction && Util::IsFemale(base)) {
+				if (g_SexLabForceMaleOnSchlong)
+					a_actor->AddToFaction(g_SexLabGenderFaction, 0);
+				else
+					a_actor->AddToFaction(g_SexLabGenderFaction, 1);
+			}
+		}
+		else {
+			a_actor->AddToFaction(g_schlongifiedFaction, -1);
+
+			if (g_SexLabGenderFaction && Util::IsFemale(base)) {
 				a_actor->AddToFaction(g_SexLabGenderFaction, 1);
-			else
-				a_actor->AddToFaction(g_SexLabGenderFaction, 0);
+			}
 		}
 
 		Util::RemoveSOSItemsFromInventory(a_actor);
-		//If the penis is NONE or the Actor has something in the slot, do nothing
+
+		// If the penis is NONE or the Actor has something in the slot, do nothing
 		if (!schlong || Util::HasSomethingInSlot52(a_actor))
 			return;
 

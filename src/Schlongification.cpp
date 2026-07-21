@@ -15,12 +15,20 @@ namespace SOS {
 
 		auto* schlong = SchlongLogic::DetermineWinningAddon(a_actor);
 		if (!schlong) {
-			//SKSE::log::debug("Actor: {} didn't equip anything", a_actor->GetDisplayFullName());
+			a_actor->AddToFaction(g_schlongifiedFaction, -1);
 			return;
 		}
 
-		if (g_SexLabGenderFaction && Util::IsFemale(base) && !Util::ArmorHasKeyword(schlong, PubKW))
-			a_actor->AddToFaction(g_SexLabGenderFaction, 0);
+		bool isValidSchlong = !Util::ArmorHasKeyword(schlong, PubKW);
+
+		if (isValidSchlong) {
+			a_actor->AddToFaction(g_schlongifiedFaction, 0);
+
+			if (g_SexLabGenderFaction && Util::IsFemale(base) && g_SexLabForceMaleOnSchlong)
+				a_actor->AddToFaction(g_SexLabGenderFaction, 0);
+		}
+		else
+			a_actor->AddToFaction(g_schlongifiedFaction, -1);
 
 		if (Util::HasSomethingInSlot52(a_actor)) {
 			SchlongLogic::ScaleSchlongBones(a_actor);
@@ -111,9 +119,8 @@ namespace SOS {
 			return RE::BSEventNotifyControl::kContinue;
 
 		auto* actor = RE::TESForm::LookupByID<RE::Actor>(a_event->formID);
-		if (actor) {
+		if (actor)
 			OnActorActivated(actor);
-		}
 
 		return RE::BSEventNotifyControl::kContinue;
 	}

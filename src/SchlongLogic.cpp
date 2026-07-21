@@ -139,6 +139,7 @@ namespace SchlongLogic {
 
 		return armor;
 	}
+
 	RE::TESObjectARMO* DetermineWinningAddon(RE::Actor* a_actor) {
 
 		if (!a_actor)

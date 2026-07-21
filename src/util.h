@@ -3,6 +3,9 @@
 #include <nlohmann/json.hpp>
 #include <SimpleIni.h>
 
+//Bool to control if females with a schlong get treated as male by SexLab
+inline bool g_SexLabForceMaleOnSchlong = true;
+
 //Keywords
 constexpr const char* GenKW = "SOS_Genitals";
 constexpr const char* NPCKW = "SOS_NoneDefault";
@@ -66,8 +69,12 @@ static constexpr std::array<const char*, 8> sNiNodes = {
 //Keywords
 constexpr const char* SLMaleKW = "SexLabTreatMale";
 constexpr const char* SLFemaleKW = "SexLabTreatFemale";
+
 //Gender Faction
 extern RE::TESFaction* g_SexLabGenderFaction;
+
+//Schlong Faction
+extern RE::TESFaction* g_schlongifiedFaction;
 
 namespace std {
 

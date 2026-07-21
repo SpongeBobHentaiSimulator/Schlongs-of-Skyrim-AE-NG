@@ -546,6 +546,68 @@ namespace Storage {
 		}
 	}
 
+	static void SetGlobalRank(RE::StaticFunctionTag*, int a_rank) {
+
+		std::int8_t rank = (a_rank <= 0) ? -1 : static_cast<std::int8_t>(std::clamp(a_rank, 1, 20));
+
+		for (auto& [addonName, addonData] : s_addons)
+			for (auto& [raceName, raceData] : addonData.compatibleRaces)
+				raceData.Rank = rank;
+
+		SKSE::log::info("SOS: Global Rank set to {} for all loaded addons via MCM.", rank);
+	}
+
+	static void SetGlobalChance(RE::StaticFunctionTag*, int a_chance) {
+
+		std::uint8_t chance = static_cast<std::uint8_t>(std::clamp(a_chance, 0, 100));
+
+		for (auto& [addonName, addonData] : s_addons)
+			for (auto& [raceName, raceData] : addonData.compatibleRaces)
+				raceData.Chance = chance;
+
+		SKSE::log::info("SOS: Global Chance set to {}% for all loaded addons via MCM.", chance);
+	}
+
+	static void SetAddonRankForAll(RE::StaticFunctionTag*, RE::BSFixedString a_addon, int a_rank) {
+
+		auto it = s_addons.find(a_addon);
+		if (it == s_addons.end())
+			return;
+
+		std::int8_t rank = (a_rank <= 0) ? -1 : static_cast<std::int8_t>(std::clamp(a_rank, 1, 20));
+
+		for (auto& [raceName, raceData] : it->second.compatibleRaces)
+			raceData.Rank = rank;
+
+		SKSE::log::debug("SOS: Rank set to {} for all races of addon '{}' via MCM.", rank, a_addon.c_str());
+	}
+
+	static void SetAddonChanceForAll(RE::StaticFunctionTag*, RE::BSFixedString a_addon, int a_chance) {
+
+		auto it = s_addons.find(a_addon);
+		if (it == s_addons.end())
+			return;
+
+		std::uint8_t chance = static_cast<std::uint8_t>(std::clamp(a_chance, 0, 100));
+
+		for (auto& [raceName, raceData] : it->second.compatibleRaces)
+			raceData.Chance = chance;
+
+		SKSE::log::debug("SOS: Chance set to {}% for all races of addon '{}' via MCM.", chance, a_addon.c_str());
+	}
+
+	static void SetAddonEnabledForAll(RE::StaticFunctionTag*, RE::BSFixedString a_addon, bool a_enabled) {
+
+		auto it = s_addons.find(a_addon);
+		if (it == s_addons.end())
+			return;
+
+		for (auto& [raceName, raceData] : it->second.compatibleRaces)
+			raceData.Enabled = a_enabled;
+
+		SKSE::log::debug("SOS: Enabled set to {} for all races of addon '{}' via MCM.", a_enabled, a_addon.c_str());
+	}
+
 	static void SaveMCMChanges(RE::StaticFunctionTag*) {
 		//Wrapper just in case
 		JSON::SaveCurrentMemoryToJson();
@@ -581,6 +643,12 @@ namespace Storage {
 		a_vm->RegisterFunction("SetAddonRaceValues", SosPapyrusScript, SetAddonRaceValues);
 		a_vm->RegisterFunction("SaveMCMChanges", SosPapyrusScript, SaveMCMChanges);
 		a_vm->RegisterFunction("GetLoadedAddonNames", SosPapyrusScript, GetLoadedAddonNames);
+
+		a_vm->RegisterFunction("SetGlobalRank", SosPapyrusScript, SetGlobalRank);
+		a_vm->RegisterFunction("SetGlobalChance", SosPapyrusScript, SetGlobalChance);
+		a_vm->RegisterFunction("SetAddonRankForAll", SosPapyrusScript, SetAddonRankForAll);
+		a_vm->RegisterFunction("SetAddonChanceForAll", SosPapyrusScript, SetAddonChanceForAll);
+		a_vm->RegisterFunction("SetAddonEnabledForAll", SosPapyrusScript, SetAddonEnabledForAll);
 
 		return true;
 	}
