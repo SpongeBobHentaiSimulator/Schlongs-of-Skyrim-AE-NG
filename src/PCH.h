@@ -118,3 +118,14 @@ namespace logger = SKSE::log;
 namespace util {
     using SKSE::stl::report_and_fail;
 }
+
+#include <format>
+#include <string_view>
+
+template <class CharT>
+struct std::formatter<RE::detail::BSFixedString<CharT>, CharT> : std::formatter<std::basic_string_view<CharT>, CharT> {
+	template <class FormatContext>
+	auto format(const RE::detail::BSFixedString<CharT>& a_str, FormatContext& a_ctx) const {
+		return std::formatter<std::basic_string_view<CharT>, CharT>::format(a_str.c_str(), a_ctx);
+	}
+};

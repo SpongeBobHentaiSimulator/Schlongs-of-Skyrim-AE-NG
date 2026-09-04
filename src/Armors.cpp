@@ -15,7 +15,7 @@ static bool ModifyArmorWithSOS(RE::TESObjectARMO* a_armor, const std::unordered_
 	if (!biped)
 		return false;
 
-	SlotMask mask = static_cast<SlotMask>(biped->GetSlotMask());
+	SlotMask mask = static_cast<SlotMask>(biped->GetSlotMask().get());
 
 	if ((mask & SLOT_32) == 0)
 		return false;
@@ -208,7 +208,7 @@ namespace Armors {
 		if (!biped)
 			return false;
 
-		SlotMask mask = static_cast<SlotMask>(biped->GetSlotMask());
+		SlotMask mask = static_cast<SlotMask>(biped->GetSlotMask().get());
 		if ((mask & SLOT_32) == 0)
 			return false;
 
@@ -231,7 +231,7 @@ namespace Armors {
 		if (!a_armor)
 			return false;
 		auto* biped = a_armor->As<RE::BGSBipedObjectForm>();
-		return biped && (static_cast<SlotMask>(biped->GetSlotMask()) & SLOT_52) == 0;
+		return biped && (static_cast<SlotMask>(biped->GetSlotMask().get()) & SLOT_52) == 0;
 	}
 
 	static bool IsConcealingAE(RE::StaticFunctionTag*, RE::TESObjectARMO* a_armor) {
@@ -239,7 +239,7 @@ namespace Armors {
 		if (!a_armor)
 			return false;
 		auto* biped = a_armor->As<RE::BGSBipedObjectForm>();
-		return biped && (static_cast<SlotMask>(biped->GetSlotMask()) & SLOT_52) != 0;
+		return biped && (static_cast<SlotMask>(biped->GetSlotMask().get()) & SLOT_52) != 0;
 	}
 
 	static void SetRevealingAE(RE::StaticFunctionTag*, RE::TESObjectARMO* a_armor) {

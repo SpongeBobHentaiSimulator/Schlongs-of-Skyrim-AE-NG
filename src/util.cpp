@@ -57,7 +57,7 @@ namespace Util {
 			SKSE::log::info("SOS AE - SexLab Compatibility Enabled (Faction cached)");
 
 		//Schlongs of Skyrim Check
-		g_schlongifiedFaction = dataHandler->LookupForm<RE::TESFaction>(0x0063B7, "Schlongs of Skyrim - Core.esm");
+		g_schlongifiedFaction = dataHandler->LookupForm<RE::TESFaction>(0x00AFF8, "Schlongs of Skyrim.esp");
 		if (g_schlongifiedFaction)
 			SKSE::log::info("SOS AE - SchlongifiedFaction cached successfully.");
 		else {

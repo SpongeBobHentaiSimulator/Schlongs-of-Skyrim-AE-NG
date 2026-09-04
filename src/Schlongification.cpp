@@ -68,7 +68,7 @@ namespace SOS {
 		if (!biped)
 			return;
 
-		SlotMask mask = static_cast<SlotMask>(biped->GetSlotMask());
+		SlotMask mask = static_cast<SlotMask>(biped->GetSlotMask().get());
 		if ((mask & SLOT_52) == 0)
 			return;
 

@@ -12,7 +12,7 @@ namespace Papyrus {
 
 		auto target = pickData->targetActor;
 		if (target)
-			if (auto ref = target.get())
+			if (auto ref = target->get())
 				if (auto* actor = ref->As<RE::Actor>())
 					return actor;
 

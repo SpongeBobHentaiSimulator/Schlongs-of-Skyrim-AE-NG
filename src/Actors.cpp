@@ -48,7 +48,7 @@ static RE::BSFixedString MakeNPCKey(RE::TESNPC* a_base) {
 	std::string fullName = a_base->GetFullName();
 	if (fullName.empty()) fullName = "Unknown";
 
-	std::string key = fmt::format("{:X}|{}|{}", localID, pluginName, fullName);
+	std::string key = std::format("{:X}|{}|{}", localID, pluginName, fullName);
 
 	return RE::BSFixedString(key.c_str());
 }
