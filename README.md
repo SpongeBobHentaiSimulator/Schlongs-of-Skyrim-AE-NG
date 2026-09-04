@@ -12,8 +12,9 @@ C++ SKSE plugin port for Skyrim Special Edition / Anniversary Edition built with
 
 1. Clone the repository recursively:
 	```bash
-	git clone --recursive <repository-url>
-	cd <repository-folder>
+	git init
+	git submodule add https://github.com/alandtse/CommonLibSSE-NG extern/CommonLibSSE-NG
+	git submodule update --init --recursive
 	```
 
 2. Compile the project:
