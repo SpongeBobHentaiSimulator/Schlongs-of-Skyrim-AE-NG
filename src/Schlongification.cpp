@@ -30,7 +30,8 @@ namespace SOS {
 		else
 			a_actor->AddToFaction(g_schlongifiedFaction, -1);
 
-		if (Util::HasSomethingInSlot52(a_actor)) {
+		//Slot52 occupied OR Underwear equipped: don't equip the Addon, just scale bones
+		if (Util::HasSomethingInSlot52(a_actor) || Util::ActorHasEquippedArmorWithKeyword(a_actor, UndwKW)) {
 			SchlongLogic::ScaleSchlongBones(a_actor);
 			return;
 		}
@@ -58,6 +59,59 @@ namespace SOS {
 		SchlongLogic::ScaleSchlongBones(a_actor);
 	}
 
+	//Handles equip/unequip of armor with the Underwear keyword.
+//It hides or restores the Addon without ever touching Slot52 itself.
+	static void HandleUnderwearChange(RE::Actor* a_actor, bool is_equipping) {
+
+		if (!a_actor)
+			return;
+
+		if (is_equipping) {
+
+			//Nothing to hide if the Slot52 is already empty
+			if (!Util::HasSomethingInSlot52(a_actor))
+				return;
+
+			//Only removes the physical Addon item, NPC data (rank/addon) stays untouched
+			Util::RemoveSOSItemsFromInventory(a_actor);
+			return;
+		}
+
+		//Underwear removed: only restore the Addon if Slot52 is still empty
+		if (Util::HasSomethingInSlot52(a_actor))
+			return;
+
+		auto* schlong = SchlongLogic::DetermineWinningAddon(a_actor);
+		if (!schlong)
+			return;
+
+		auto* equipManager = RE::ActorEquipManager::GetSingleton();
+		if (!equipManager)
+			return;
+
+		//Cleanup any leftover unequipped Addon items before adding it back
+		Util::RemoveSOSItemsFromInventory(a_actor);
+		a_actor->AddObjectToContainer(schlong, nullptr, 1, nullptr);
+
+		RE::FormID refID = a_actor->GetFormID();
+		g_activeActors.insert(refID);
+
+		equipManager->EquipObject(
+			a_actor,
+			schlong,
+			nullptr,
+			1,
+			nullptr,
+			true,  // preventUnequip
+			false, // playSound
+			true,  // immediate
+			true   // applyNow
+		);
+
+		SchlongLogic::ScaleSchlongBones(a_actor);
+		g_activeActors.erase(refID);
+	}
+
 	static void OnWearChange(RE::Actor* a_actor, const RE::TESEquipEvent* a_event, bool is_equipping) {
 
 		auto* armor = RE::TESForm::LookupByID<RE::TESObjectARMO>(a_event->baseObject);
@@ -67,6 +121,12 @@ namespace SOS {
 		auto* biped = armor->As<RE::BGSBipedObjectForm>();
 		if (!biped)
 			return;
+
+		//Underwear doesn't touch Slot52, so it's handled in its own separate branch
+		if (Util::ArmorHasKeyword(armor, UndwKW)) {
+			HandleUnderwearChange(a_actor, is_equipping);
+			return;
+		}
 
 		SlotMask mask = static_cast<SlotMask>(biped->GetSlotMask().get());
 		if ((mask & SLOT_52) == 0)
@@ -81,6 +141,10 @@ namespace SOS {
 		else {
 
 			if (Util::ArmorHasKeyword(armor, GenKW))
+				return;
+
+			//If Underwear is still equipped, the Addon must stay hidden even though Slot52 is now free
+			if (Util::ActorHasEquippedArmorWithKeyword(a_actor, UndwKW))
 				return;
 
 			auto* schlong = SchlongLogic::DetermineWinningAddon(a_actor);

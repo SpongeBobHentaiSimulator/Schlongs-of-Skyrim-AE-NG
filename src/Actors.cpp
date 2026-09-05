@@ -295,8 +295,8 @@ namespace Actors {
 
 		Util::RemoveSOSItemsFromInventory(a_actor);
 
-		// If the penis is NONE or the Actor has something in the slot, do nothing
-		if (!schlong || Util::HasSomethingInSlot52(a_actor))
+		// If the penis is NONE, the Actor has something in the slot, or Underwear is equipped, do nothing
+		if (!schlong || Util::HasSomethingInSlot52(a_actor) || Util::ActorHasEquippedArmorWithKeyword(a_actor, UndwKW))
 			return;
 
 		auto* equipManager = RE::ActorEquipManager::GetSingleton();

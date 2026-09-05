@@ -112,6 +112,25 @@ namespace Util {
 		return a_armor && a_keyword && a_armor->HasKeywordString(a_keyword);
 	}
 
+	bool ActorHasEquippedArmorWithKeyword(RE::Actor* a_actor, const char* a_keyword) {
+
+		if (!a_actor || !a_keyword)
+			return false;
+
+		for (const auto& [item, data] : a_actor->GetInventory()) {
+			const auto& [count, entry] = data;
+
+			if (entry && entry->IsWorn()) {
+				if (auto armor = item->As<RE::TESObjectARMO>()) {
+					if (ArmorHasKeyword(armor, a_keyword))
+						return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	void RemoveSOSItemsFromInventory(RE::Actor* a_actor) {
 
 		if (!a_actor)

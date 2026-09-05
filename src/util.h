@@ -101,6 +101,8 @@ namespace Util {
 
 	bool ArmorHasKeyword(RE::TESObjectARMO* a_armor, const char* a_keyword);
 
+	bool ActorHasEquippedArmorWithKeyword(RE::Actor* a_actor, const char* a_keyword);
+
 	const std::array<std::string_view, 11>& GetDefaultConcealingPlugins();
 
 	void RemoveSOSItemsFromInventory(RE::Actor* a_actor);
