@@ -10,9 +10,9 @@ namespace Papyrus {
 		if (!pickData)
 			return RE::PlayerCharacter::GetSingleton();
 
-		auto target = pickData->targetActor;
+		auto& target = pickData->target[0];
 		if (target)
-			if (auto ref = target->get())
+			if (auto ref = target.get())
 				if (auto* actor = ref->As<RE::Actor>())
 					return actor;
 
