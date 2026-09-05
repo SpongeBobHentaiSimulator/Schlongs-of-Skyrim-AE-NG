@@ -171,7 +171,8 @@ namespace SchlongLogic {
 
 		int ceiling = std::max(100, totalWeight);
 
-		static std::uniform_int_distribution<int> dist_100(1, 100);
+		if (!Util::IsFemale(npcBase))
+			ceiling = totalWeight;
 
 		std::uniform_int_distribution<int> dist(1, ceiling);
 

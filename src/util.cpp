@@ -210,14 +210,6 @@ namespace Util {
 		return a_actor->GetWornArmor(RE::BIPED_MODEL::BipedObjectSlot::kModPelvisSecondary) != nullptr;
 	}
 
-	bool IsMale(RE::TESNPC* a_base) {
-
-		if (!a_base)
-			return false;
-
-		return a_base->GetSex() == RE::SEX::kMale;
-	}
-
 	bool IsFemale(RE::TESNPC* a_base) {
 
 		if (!a_base)

@@ -12,6 +12,7 @@ constexpr const char* NPCKW = "SOS_NoneDefault";
 constexpr const char* RevKW = "SOS_Revealing";
 constexpr const char* ConKW = "SOS_Concealing";
 constexpr const char* PubKW = "SOS_Pubes";
+constexpr const char* UndwKW = "SOS_Underwear";
 
 //Shortname for Slotmask
 using SlotMask = std::underlying_type_t<RE::BIPED_MODEL::BipedObjectSlot>;
@@ -78,22 +79,13 @@ extern RE::TESFaction* g_schlongifiedFaction;
 
 namespace std {
 
-	// Le decimos al compilador: "Te voy a ense�ar a procesar un tipo de dato nuevo"
-	// El tipo de dato es el BSFixedString (el formato de texto que usa Skyrim)
 	template <class CharT>
 	struct hash<RE::detail::BSFixedString<CharT>> {
 
-		// Esta es la funci�n que se activa cuando el programa necesita el "ID num�rico" del texto
 		size_t operator()(const RE::detail::BSFixedString<CharT>& a_string) const {
 
-			// PASO 1: "a_string.data()" obtiene d�nde empieza el texto en la memoria.
-			// PASO 2: "a_string.size()" mide qu� tan largo es ese texto.
-			// PASO 3: Creamos una "vista" (string_view), que es como poner un cristal encima 
-			// del texto original para leerlo sin tener que copiarlo ni moverlo.
 			auto vista_del_texto = std::basic_string_view<CharT>(a_string.data(), a_string.size());
 
-			// PASO 4: Usamos la calculadora de C++ para convertir esa "vista" en un n�mero �nico (Hash).
-			// PASO 5: Devolvemos ese n�mero para que el mod encuentre los datos del NPC al instante.
 			return std::hash<std::basic_string_view<CharT>>{}(vista_del_texto);
 		}
 	};
@@ -118,8 +110,6 @@ namespace Util {
 	std::optional<std::string> GetSOSAddonName(RE::BGSListForm* a_list);
 
 	bool HasSomethingInSlot52(RE::Actor* a_actor);
-
-	bool IsMale(RE::TESNPC* a_base);
 
 	bool IsFemale(RE::TESNPC* a_base);
 
