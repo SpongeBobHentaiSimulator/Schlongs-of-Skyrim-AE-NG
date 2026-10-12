@@ -9,6 +9,14 @@ static bool ModifyNPCWithSOS(RE::TESNPC* a_npc, RE::BGSKeyword* a_kwNone, const 
 	if (!a_npc || !a_kwNone)
 		return false;
 
+	if (!Util::IsFemale(a_npc)) {
+		if (!a_npc->HasKeyword(a_kwNone)) {
+			a_npc->AddKeyword(a_kwNone);
+			return true;
+		}
+		return false;
+	}
+
 	auto* file = a_npc->GetFile(0);
 	if (!file)
 		return false;
@@ -16,12 +24,12 @@ static bool ModifyNPCWithSOS(RE::TESNPC* a_npc, RE::BGSKeyword* a_kwNone, const 
 	RE::BSFixedString modName(file->GetFilename());
 	bool isInList = a_whitelist.contains(modName);
 
-	if (g_isWhitelistMode != isInList) 
-
+	if (g_isWhitelistMode != isInList) {
 		if (!a_npc->HasKeyword(a_kwNone)) {
 			a_npc->AddKeyword(a_kwNone);
 			return true;
 		}
+	}
 
 	return false;
 }

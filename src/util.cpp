@@ -69,7 +69,6 @@ namespace Util {
 		}
 	}
 
-
 	std::unordered_set<RE::BSFixedString> LoadValidatedModList(const RE::BSFixedString& a_filePath, const RE::BSFixedString& a_listName) {
 
 		std::unordered_set<RE::BSFixedString> validMods;
@@ -161,20 +160,6 @@ namespace Util {
 				nullptr,
 				nullptr);
 		}
-	}
-
-	static bool IsArmorInSet(RE::TESObjectARMO* a_armor, const std::unordered_set<RE::BSFixedString>& a_plugins) {
-
-		if (!a_armor) 
-			return false;
-
-		const auto* file = a_armor->GetFile(0);
-		if (!file) 
-			return false;
-
-		RE::BSFixedString filename(file->GetFilename());
-
-		return a_plugins.contains(filename);
 	}
 
 	std::string GetEditorIDSafe(const RE::TESForm* a_form) {
